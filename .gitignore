@@ -90,8 +90,8 @@ db.sqlite3
 
 
 
-.idea
-.vscode
+.idea/
+.vscode/
 Screenshot_from_2020-07-22_13-17-57.png
 *.png
 *.jpg
