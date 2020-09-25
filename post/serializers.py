@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from post.models import Post
 
+
 class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
@@ -11,6 +12,7 @@ class PostListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('image', 'author', 'text')
+
 
 class PostDetailSerializer(serializers.ModelSerializer):
     class Meta:
