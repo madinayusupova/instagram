@@ -37,10 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'post',
+    'django.contrib.sites',
     'rest_framework',
+    'post',
+
+    'comments',
+
     'knox',
     'django_rest_passwordreset',
+
 ]
 
 MIDDLEWARE = [
