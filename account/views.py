@@ -5,9 +5,12 @@ from .serializers import UserSerializer, RegisterSerializer
 from django.contrib.auth import login
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LoginView as KnoxLoginView
+from .models import UserFollowing
 from django.contrib.auth.models import User
 from .serializers import ChangePasswordSerializer
 from rest_framework.permissions import IsAuthenticated
+
+
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
@@ -63,3 +66,24 @@ class ChangePasswordView(generics.UpdateAPIView):
             return Response(response)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def follow(request, follow_id):
+    user = AuthToken.objects.get(id=follow_id)
+    UserFollowing.objects.create(user_id = request.user, following_user_id=user)
+    Response({"done": "OK"})
+
+
+
+def my_following(request):
+    user = AuthToken.objects.get(id = request.user.id)
+    following = user.following.all()
+    return Response({"following": following})
+
+
+def my_followers(request):
+    user = AuthToken.objects.get(id = request.user)
+    followers = user.followers.all()
+    return Response({"followers": followers})
+
+
