@@ -1,4 +1,5 @@
-from rest_framework import generics, permissions, status
+from django.contrib.auth.decorators import login_required
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from knox.models import AuthToken
 from .serializers import UserSerializer, RegisterSerializer
@@ -8,8 +9,7 @@ from knox.views import LoginView as KnoxLoginView
 from .models import UserFollowing
 from django.contrib.auth.models import User
 from .serializers import ChangePasswordSerializer
-from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 
 # Register API
@@ -68,22 +68,33 @@ class ChangePasswordView(generics.UpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def follow(request, follow_id):
-    user = AuthToken.objects.get(id=follow_id)
-    UserFollowing.objects.create(user_id = request.user, following_user_id=user)
-    Response({"done": "OK"})
+class UserFollowingViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = UserSerializer
+    queryset = UserFollowing.objects.all()
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from .models import UserFollowing
 
 
+@require_POST
+@login_required
+def user_follow(request):
+    user_id = request.POST.get('id')
+    action = request.POST.get('action')
+    if user_id and action:
+        try:
+            user = User.objects.get(id=user_id)
+            if action == 'follow':
+                UserFollowing.objects.get_or_create(following_user_id=request.user, user_to=user)
+            else:
+                UserFollowing.objects.filter(following_user_id=request.user, user_to=user).delete()
+            return JsonResponse({'status':'ok'})
+        except User.DoesNotExist:
+            return JsonResponse({'status':'ok'})
+        return JsonResponse({'status':'ok'})
 
-def my_following(request):
-    user = AuthToken.objects.get(id = request.user.id)
-    following = user.following.all()
-    return Response({"following": following})
 
-
-def my_followers(request):
-    user = AuthToken.objects.get(id = request.user)
-    followers = user.followers.all()
-    return Response({"followers": followers})
 
 

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework',
     'knox',
+    'account',
     'post',
     'comments',
     'account',
