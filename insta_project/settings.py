@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'account',
     'post',
     'comments',
-    'account',
 
 ]
 
@@ -129,10 +128,10 @@ STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
         'knox.auth.TokenAuthentication',
     ]
 }
+
+SITE_ID=1
 
 

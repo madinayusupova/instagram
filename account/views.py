@@ -76,24 +76,32 @@ class UserFollowingViewSet(viewsets.ModelViewSet):
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import UserFollowing
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
-@require_POST
-@login_required
+@api_view(['POST'])
+@login_required()
 def user_follow(request):
-    user_id = request.POST.get('id')
-    action = request.POST.get('action')
+    print("FUNCTION IS CALLING")
+    user_id = request.data.get('id')
+    action = request.data.get('action')
+    print(request.user)
     if user_id and action:
         try:
             user = User.objects.get(id=user_id)
+            print("USER", user)
             if action == 'follow':
-                UserFollowing.objects.get_or_create(following_user_id=request.user, user_to=user)
+                print("FOLLOWING")
+                UserFollowing.objects.get_or_create(kogo_follow=request.user, kto=user)
             else:
-                UserFollowing.objects.filter(following_user_id=request.user, user_to=user).delete()
-            return JsonResponse({'status':'ok'})
+                print("UNFOLLOWING")
+                UserFollowing.objects.filter(kogo_follow=request.user, kto=user).delete()
+                return Response({'status':'unfollowed'})
         except User.DoesNotExist:
-            return JsonResponse({'status':'ok'})
-        return JsonResponse({'status':'ok'})
+            return Response({'status':'user does not exist'})
+        return Response({'status':'followed'})
+    return Response({'status':'oblom'})
 
 
 

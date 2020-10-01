@@ -16,4 +16,3 @@ class PostAdmin(admin.ModelAdmin):
 #     list_display = ('author', 'post', 'created', 'active')
 #     list_filter = ('active', 'created', 'updated')
 #     search_fields = ('author', 'body')
-admin.site.register(Post)
