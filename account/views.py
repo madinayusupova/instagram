@@ -1,13 +1,16 @@
-from rest_framework import generics, permissions, status
+from django.contrib.auth.decorators import login_required
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from knox.models import AuthToken
 from .serializers import UserSerializer, RegisterSerializer
 from django.contrib.auth import login
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LoginView as KnoxLoginView
+from .models import UserFollowing
 from django.contrib.auth.models import User
 from .serializers import ChangePasswordSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
@@ -63,3 +66,43 @@ class ChangePasswordView(generics.UpdateAPIView):
             return Response(response)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserFollowingViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = UserSerializer
+    queryset = UserFollowing.objects.all()
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from .models import UserFollowing
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+
+@api_view(['POST'])
+@login_required()
+def user_follow(request):
+    print("FUNCTION IS CALLING")
+    user_id = request.data.get('id')
+    action = request.data.get('action')
+    print(request.user)
+    if user_id and action:
+        try:
+            user = User.objects.get(id=user_id)
+            print("USER", user)
+            if action == 'follow':
+                print("FOLLOWING")
+                UserFollowing.objects.get_or_create(kogo_follow=request.user, kto=user)
+            else:
+                print("UNFOLLOWING")
+                UserFollowing.objects.filter(kogo_follow=request.user, kto=user).delete()
+                return Response({'status':'unfollowed'})
+        except User.DoesNotExist:
+            return Response({'status':'user does not exist'})
+        return Response({'status':'followed'})
+    return Response({'status':'oblom'})
+
+
+
+
